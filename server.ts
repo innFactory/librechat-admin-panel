@@ -6,9 +6,6 @@ const SERVER_ENTRY = new URL('./dist/server/server.js', import.meta.url);
 
 const env = process.env;
 
-// BASE_PATH support: strip trailing slash, default to empty string (root)
-const basePath = (env.BASE_PATH || '').replace(/\/+$/, '');
-
 const ONE_DAY = 86400;
 const rawMaxAge = Number(env.ADMIN_PANEL_STATIC_CACHE_MAX_AGE ?? env.STATIC_CACHE_MAX_AGE);
 const rawSMaxAge = Number(env.ADMIN_PANEL_STATIC_CACHE_S_MAX_AGE ?? env.STATIC_CACHE_S_MAX_AGE);
@@ -43,8 +40,7 @@ async function buildStaticRoutes(): Promise<Record<string, () => Response>> {
   for await (const path of new Glob('**/*').scan(CLIENT_DIR)) {
     const file = Bun.file(`${CLIENT_DIR}/${path}`);
     const cache = getCacheHeaders(path);
-    // Prefix static file routes with basePath so /admin/assets/... resolves correctly
-    routes[`${basePath}/${path}`] = () =>
+    routes[`/${path}`] = () =>
       new Response(file, { headers: { 'Content-Type': file.type, ...cache } });
   }
   return routes;
@@ -54,13 +50,7 @@ Bun.serve({
   port: Number(process.env.PORT ?? 3000),
   routes: {
     ...(await buildStaticRoutes()),
-    // Redirect bare basePath without trailing slash to basePath/
-    ...(basePath
-      ? {
-          [basePath]: () => Response.redirect(`${basePath}/`, 301),
-        }
-      : {}),
-    [`${basePath}/*`]: async (req) => {
+    '/*': async (req) => {
       const res = await handler.fetch(req);
       const patched = new Response(res.body, res);
       for (const [k, v] of Object.entries(NO_CACHE)) {
@@ -71,6 +61,4 @@ Bun.serve({
   },
 });
 
-console.log(
-  `Admin panel listening on http://localhost:${process.env.PORT ?? 3000}${basePath || '/'}`,
-);
+console.log(`Admin panel listening on http://localhost:${process.env.PORT ?? 3000}`);

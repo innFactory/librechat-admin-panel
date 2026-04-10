@@ -44,8 +44,6 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/innfactory/librechat-admin-panel:${{ github.sha }}
-            ghcr.io/innfactory/librechat-admin-panel:latest
-          build-args: |
-            BASE_PATH=/admin
+            ghcr.io/clickhouse/librechat-admin-panel:${{ github.sha }}
+            ghcr.io/clickhouse/librechat-admin-panel:latest
           platforms: linux/amd64,linux/arm64

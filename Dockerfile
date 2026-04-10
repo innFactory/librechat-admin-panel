@@ -11,11 +11,9 @@ RUN bun install --frozen-lockfile
 
 # --- Build ---
 FROM base AS build
-ARG BASE_PATH=/
 COPY --from=deps /app/node_modules node_modules
 COPY . .
 ENV NODE_ENV=production
-ENV BASE_PATH=${BASE_PATH}
 RUN bun run build
 
 # --- Production dependencies (patches applied, then devDeps stripped) ---
@@ -40,7 +38,7 @@ USER bun
 ENV PORT=3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD bun -e "fetch(\`http://localhost:\${process.env.PORT}\${process.env.BASE_PATH||'/'}\`).then(r=>{if(!r.ok)throw 1}).catch(()=>process.exit(1))"
+  CMD bun -e "fetch(\`http://localhost:\${process.env.PORT}\`).then(r=>{if(!r.ok)throw 1}).catch(()=>process.exit(1))"
 
 EXPOSE 3000
 CMD ["bun", "run", "start"]
