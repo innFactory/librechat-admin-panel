@@ -28,6 +28,8 @@ if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'development') {
   );
 }
 
+const cookiePath = process.env.BASE_PATH || '/';
+
 export function useAppSession(): ReturnType<typeof useSession<t.SessionData>> {
   return useSession<t.SessionData>({
     name: 'admin-session',
@@ -37,6 +39,7 @@ export function useAppSession(): ReturnType<typeof useSession<t.SessionData>> {
       sameSite: 'lax',
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 7,
+      path: cookiePath,
     },
   });
 }

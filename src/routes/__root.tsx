@@ -24,6 +24,8 @@ const themeScript = `(function(){
   } catch(e) {}
 })();`;
 
+const basePathScript = `window.__BASE_PATH__=${JSON.stringify(import.meta.env.BASE_URL?.replace(/\/+$/, '') || '')};`;
+
 export const Route = createRootRoute({
   ssr: false,
   head: () => ({
@@ -94,6 +96,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <ScriptOnce children={basePathScript} />
         <ScriptOnce children={themeScript} />
         {children}
         <TanStackDevtools
